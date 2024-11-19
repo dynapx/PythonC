@@ -2,12 +2,28 @@
 #include <Python.h>
 #include <stddef.h> /* for offsetof() */
 
+
+
 typedef struct {
     PyObject_HEAD
     PyObject *first; /* first name */
     PyObject *last;  /* last name */
     int number;
 } CustomObject;
+
+//static PyObject *
+//custom_repr(CustomObject *obj)
+//{
+//    return PyUnicode_FromFormat("print the new type {{name:%S %S}}",
+//                                obj->first,obj->last);
+//}
+
+static PyObject *
+custom_str(CustomObject *obj)
+{
+    return PyUnicode_FromFormat("print the new type {{name:%S %S}}",
+                                obj->first,obj->last);
+}
 static int Custom_traverse(CustomObject*self,visitproc visit, void *arg)
 {
     Py_VISIT(self->first);
@@ -31,7 +47,7 @@ static void Custom_dealloc(CustomObject *self)
   PyObject_GC_UnTrack(self);
     Custom_clear(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
-    printf("delte over\n");
+   // printf("delte over\n");
 }
 
 static PyObject *
@@ -105,6 +121,31 @@ static PyMethodDef Custom_methods[] = {
     },
     {NULL}  /* Sentinel */
 };
+static PyObject *
+CustomObject_richcmp(CustomObject *obj1, CustomObject *obj2, int op)
+{
+    PyObject *result;
+    int c, size1, size2;
+
+    /* code to make sure that both arguments are of type
+       newdatatype omitted */
+
+    size1 = obj1->number;
+    size2 = obj2->number;
+
+    switch (op) {
+    case Py_LT: c = size1 <  size2; break;
+    case Py_LE: c = size1 <= size2; break;
+    case Py_EQ: c = size1 == size2; break;
+    case Py_NE: c = size1 != size2; break;
+    case Py_GT: c = size1 >  size2; break;
+    case Py_GE: c = size1 >= size2; break;
+    }
+    result = c ? Py_True : Py_False;
+    Py_INCREF(result);
+    return result;
+ }
+
 
 static PyTypeObject CustomType = {
     .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
@@ -120,13 +161,41 @@ static PyTypeObject CustomType = {
     .tp_clear=(inquiry) Custom_clear,
     .tp_members = Custom_members,
     .tp_methods = Custom_methods,
+    //.tp_repr=custom_repr,
+    .tp_str=custom_str,
+    .tp_richcompare=CustomObject_richcmp
+};
+static PyObject *my_function(PyObject *self, PyObject *args) {
+    PyObject *some_object;
+
+    // 解析参数
+    if (!PyArg_ParseTuple(args, "O", &some_object)) {
+        return NULL;
+    }
+
+    // 检查类型
+    if (!PyObject_TypeCheck(some_object, &CustomType)) {
+        //PyErr_SetString(PyExc_TypeError, "arg #1 not a MyType object");
+           printf(" not pass the check\n");
+         Py_RETURN_NONE;
+    }
+    printf(" pass the check\n");
+
+    // 类型匹配，继续处理
+    Py_RETURN_NONE;
+}
+static PyMethodDef Mymethod[]=
+{
+   { "my_function",my_function,METH_VARARGS , "CHECK IF ARGUMENT IS MYTYPE"},
+   {NULL,NULL,0,NULL}
 };
 
 static PyModuleDef custommodule = {
-    .m_base =PyModuleDef_HEAD_INIT,
-    .m_name = "custom2",
-    .m_doc = "Example module that creates an extension type.",
-    .m_size = -1,
+    PyModuleDef_HEAD_INIT,
+    "custom2",
+     "Example module that creates an extension type.",
+    -1,
+    Mymethod
 };
 
 PyMODINIT_FUNC

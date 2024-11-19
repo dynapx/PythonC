@@ -1,2 +1,4 @@
 import spam
-status = spam.system("dir /P")
+import sys
+status = spam.system("1")
+print(sys.getrefcount(status))

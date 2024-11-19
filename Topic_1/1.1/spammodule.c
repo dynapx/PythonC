@@ -4,18 +4,25 @@ static PyObject *SpamError;
 
 static PyObject * spam_system(PyObject *self, PyObject *args)
 {
-    const char *command;
-    int sts;
+//    const char *command;
+//    int sts;
+//
+//    if (!PyArg_ParseTuple(args, "s", &command))
+//        return NULL;
+//    sts = system(command);
+//    if(sts<0){
+//
+//    PyErr_SetString(SpamError, "System command failed");
+//     return NULL;
+//     }
 
-    if (!PyArg_ParseTuple(args, "s", &command))
-        return NULL;
-    sts = system(command);
-    if(sts<0){
+//    PyObject *test1=_PyObject_New(PyLong_FromLong(1));
+PyObject *test1=_PyObject_New(PyLong_FromLong(1000));
+    printf("test1=%d\n",Py_REFCNT(test1));
+    PyObject* test2=test1;
+    printf("test2=%d\n",Py_REFCNT(test2));
 
-    PyErr_SetString(SpamError, "System command failed");
-     return NULL;
-     }
-    return PyLong_FromLong(sts);
+    return test1;
 }
 
 
@@ -23,7 +30,7 @@ static PyObject * spam_system(PyObject *self, PyObject *args)
 
 static PyMethodDef SpamMethods[] = {
 
-    {"system",  spam_system, METH_VARARGS,
+    {"system",  spam_system,METH_VARARGS,
      "Execute a shell command."},
       {NULL, NULL, 0, NULL}        /* Sentinel */
 };

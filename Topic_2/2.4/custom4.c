@@ -31,6 +31,7 @@ Custom_dealloc(CustomObject *self)
     PyObject_GC_UnTrack(self);
     Custom_clear(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
+    printf("delete over\n");
 }
 
 static PyObject *
